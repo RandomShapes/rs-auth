@@ -6,7 +6,7 @@
     "Jamie Spittal <spittal@kerplunc.com>"
   ],
   "description": "Easy to use Angular Authentication with user-roles, using webstorage.",
-  "main": "dist/rsAuth.min.js",
+  "main": "dist/rs-auth.min.js",
   "keywords": [
     "AnguarJs",
     "Authentication",
