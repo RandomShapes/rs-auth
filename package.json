@@ -1,0 +1,20 @@
+{
+  "name": "rsAuth",
+  "version": "0.0.1",
+  "description": "Easy to use Angular Authentication System",
+  "authors": [
+    "Jamie Spittal <spittal@randomshapes.com>"
+  ],
+  "license": "MIT",
+  "jshintConfig": {},
+  "devDependencies": {
+    "gulp": "~3.8.5",
+    "gulp-util": "~2.2.19",
+    "gulp-concat": "~2.2.0",
+    "gulp-uglify": "~0.3.1",
+    "gulp-jshint": "~1.6.3",
+    "jshint-stylish": "~0.2.0",
+    "gulp-load-plugins": "~0.5.3",
+    "run-sequence": "~0.3.6"
+  }
+}
