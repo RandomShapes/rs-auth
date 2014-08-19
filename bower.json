@@ -1,0 +1,18 @@
+{
+  "name": "rs-auth",
+  "version": "0.0.1",
+  "homepage": "https://github.com/RandomShapes/rs-auth",
+  "authors": [
+    "Jamie Spittal <spittal@kerplunc.com>"
+  ],
+  "description": "Easy to use Angular Authentication with user-roles, using webstorage.",
+  "main": "dist/rsAuth.min.js",
+  "keywords": [
+    "AnguarJs",
+    "Authentication",
+    "Auth",
+    "User",
+    "Role"
+  ],
+  "license": "MIT"
+}

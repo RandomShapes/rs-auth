@@ -1,12 +1,29 @@
 {
-  "name": "rsAuth",
+  "name": "rs-auth",
   "version": "0.0.1",
-  "description": "Easy to use Angular Authentication System",
-  "authors": [
-    "Jamie Spittal <spittal@randomshapes.com>"
+  "description": "Easy to use Angular Authentication with user-roles, using webstorage.",
+  "main": "dist/rsAuth.min.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RandomShapes/rs-auth.git"
+  },
+  "keywords": [
+    "AngularJs",
+    "Angular",
+    "Auth",
+    "Authentication",
+    "User",
+    "Role"
   ],
+  "author": "Jamie Spittal <jamie@randomshapes.com>",
   "license": "MIT",
-  "jshintConfig": {},
+  "bugs": {
+    "url": "https://github.com/RandomShapes/rs-auth/issues"
+  },
+  "homepage": "https://github.com/RandomShapes/rs-auth",
   "devDependencies": {
     "gulp": "~3.8.5",
     "gulp-util": "~2.2.19",
@@ -14,7 +31,10 @@
     "gulp-uglify": "~0.3.1",
     "gulp-jshint": "~1.6.3",
     "jshint-stylish": "~0.2.0",
+    "browser-sync": "~1.1.2",
+    "gulp-watch": "~0.6.8",
     "gulp-load-plugins": "~0.5.3",
-    "run-sequence": "~0.3.6"
+    "run-sequence": "~0.3.6",
+    "gulp-useref": "~0.5.0"
   }
 }
