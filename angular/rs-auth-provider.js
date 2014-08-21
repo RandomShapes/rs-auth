@@ -1,5 +1,3 @@
-var app = angular.module('rs-auth');
-
 /**
 * rsAuth
 * author: Jamie Spittal james@randomshapes.ca

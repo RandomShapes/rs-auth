@@ -1,5 +1,4 @@
-var app = angular.module('rs-auth', [])
-	.constant('AUTH_EVENTS', {
+app.constant('AUTH_EVENTS', {
 	  loginSuccess: 'auth-login-success',
 	  loginFailed: 'auth-login-failed',
 	  logoutSuccess: 'auth-logout-success',

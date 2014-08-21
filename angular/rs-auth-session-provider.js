@@ -1,4 +1,3 @@
-var app = angular.module('rs-auth');
 /**
 * Session Service
 * author: Jamie Spittal james@randomshapes.ca

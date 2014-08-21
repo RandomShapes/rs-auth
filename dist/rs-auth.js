@@ -1,5 +1,5 @@
-var app = angular.module('rs-auth', [])
-	.constant('AUTH_EVENTS', {
+var app = angular.module('rs-auth', []);
+app.constant('AUTH_EVENTS', {
 	  loginSuccess: 'auth-login-success',
 	  loginFailed: 'auth-login-failed',
 	  logoutSuccess: 'auth-logout-success',
@@ -7,9 +7,41 @@ var app = angular.module('rs-auth', [])
 	  notAuthenticated: 'auth-not-authenticated',
 	  notAuthorized: 'auth-not-authorized'
 	});
-var app = angular.module('rs-auth', []);
-var app = angular.module('rs-auth');
+/**
+* Session Service
+* author: Jamie Spittal james@randomshapes.ca
+* Methods for getting and setting current session variables. Also, used for recalling a remembered session.
+*/
+app.service('$rsSession', ['$window',function ($window) {
+    this.set = function(key,value) {
+      $window.sessionStorage.setItem(key,value);
+    };
+    this.get = function(key) {
+      return $window.sessionStorage.getItem(key);
+    };
+    this.setUser = function(value) {
+      $window.sessionStorage.setItem('user',JSON.stringify(value));
+    };
+    this.getUser = function() {
+      return JSON.parse($window.sessionStorage.getItem('user'));
+    };
+    this.unset = function(key) {
+      $window.sessionStorage.removeItem(key);
+    };
 
+    this.setLocalAuth = function(authToken) {
+      $window.localStorage.setItem('authToken', authToken);
+    };
+    this.getLocalAuth = function() {
+      return $window.localStorage.getItem('authToken');
+    };
+
+    //Clears everything in local and session storage.
+    this.clear = function() {
+      $window.sessionStorage.clear();
+      $window.localStorage.clear();
+    };
+}]);
 /**
 * rsAuth
 * author: Jamie Spittal james@randomshapes.ca
@@ -118,81 +150,44 @@ app.provider('$rsAuth', function $rsAuth() {
     };
   };
 });
-var app = angular.module('rs-auth', [])
-	.run(['$rsSession','AUTH_EVENTS','$timeout','$rootScope','$rsAuth', function($rsSession,AUTH_EVENTS,titleBannerService,flashService,$timeout,$rootScope,$rsAuth) {
+app.run(['$rsSession','AUTH_EVENTS','$timeout','$rootScope','$rsAuth', function($rsSession,AUTH_EVENTS,titleBannerService,flashService,$timeout,$rootScope,$rsAuth) {
 
-	  //Check to see if the session is remembered, and then check to see if the login should be remembered globally.
-	  if ($rsAuth.isAuthenticated()) {
-	    $timeout(function() {
-	      $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-	    });
-	  } else if (!!$rsSession.getLocalAuth()) { //If the session is remembered globally, validate the token make sure it's clean.
-	    var authToken = $rsSession.getLocalAuth();
-	    $rsAuth.validateToken(authToken).then(function() {
-	      $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-	    });
-	  }
+	//Check to see if the session is remembered, and then check to see if the login should be remembered globally.
+	if ($rsAuth.isAuthenticated()) {
+		$timeout(function() {
+			$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+		});
+	} else if (!!$rsSession.getLocalAuth()) { //If the session is remembered globally, validate the token make sure it's clean.
+		var authToken = $rsSession.getLocalAuth();
+		$rsAuth.validateToken(authToken).then(function() {
+			$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+		});
+	}
 
-	  //Listen for when the state changes (basically a url change) then check the user-role and see if
-	  //the user is authorized to see the content
-	  $rootScope.$on('$stateChangeStart', function (event, args) {
+	//Listen for when the state changes (basically a url change) then check the user-role and see if
+	//the user is authorized to see the content
+	$rootScope.$on('$stateChangeStart', function (event, args) {
 
-	    var authorizedRoles = {
-	      all: "*"
-	    };
+	var authorizedRoles = {
+		all: "*"
+	};
 
-	    //Get the authorized roles from the $stateProvider, look below at config to see where they are declared
-	    if(args.data.authorizedRoles) {
-	      authorizedRoles = args.data.authorizedRoles;
-	    }
-	    //Do a check to make sure that's it's not ALL and that they are authorized.
-	    if (authorizedRoles[0] !== $rsAuth.userRoles.all && !$rsAuth.isAuthorized(authorizedRoles)) {
-	      //If they are not authorized, prevent the default event, which is go to it.
-	      event.preventDefault();
-	      if ($rsAuth.isAuthenticated()) {
-	        //If you're logged in but you're not authenticated to see the content.
-	        $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
-	      } else {
-	        //If they are not logged in at all, redirect them to home ($state.go('home')) and tell them they are stupid for trying.
-	        $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
-	      }
-	    }
-	  });
+	//Get the authorized roles from the $stateProvider, look below at config to see where they are declared
+	if(args.data.authorizedRoles) {
+		authorizedRoles = args.data.authorizedRoles;
+	}
+	//Do a check to make sure that's it's not ALL and that they are authorized.
+	if (authorizedRoles[0] !== $rsAuth.userRoles.all && !$rsAuth.isAuthorized(authorizedRoles)) {
+		//If they are not authorized, prevent the default event, which is go to it.
+		event.preventDefault();
+		if ($rsAuth.isAuthenticated()) {
+			//If you're logged in but you're not authenticated to see the content.
+			$rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
+		} else {
+		//If they are not logged in at all, redirect them to home ($state.go('home')) and tell them they are stupid for trying.
+		$rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+		}
+	}
+	});
 
-	}]);
-var app = angular.module('rs-auth');
-/**
-* Session Service
-* author: Jamie Spittal james@randomshapes.ca
-* Methods for getting and setting current session variables. Also, used for recalling a remembered session.
-*/
-app.service('$rsSession', ['$window',function ($window) {
-    this.set = function(key,value) {
-      $window.sessionStorage.setItem(key,value);
-    };
-    this.get = function(key) {
-      return $window.sessionStorage.getItem(key);
-    };
-    this.setUser = function(value) {
-      $window.sessionStorage.setItem('user',JSON.stringify(value));
-    };
-    this.getUser = function() {
-      return JSON.parse($window.sessionStorage.getItem('user'));
-    };
-    this.unset = function(key) {
-      $window.sessionStorage.removeItem(key);
-    };
-
-    this.setLocalAuth = function(authToken) {
-      $window.localStorage.setItem('authToken', authToken);
-    };
-    this.getLocalAuth = function() {
-      return $window.localStorage.getItem('authToken');
-    };
-
-    //Clears everything in local and session storage.
-    this.clear = function() {
-      $window.sessionStorage.clear();
-      $window.localStorage.clear();
-    };
 }]);

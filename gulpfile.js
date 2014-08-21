@@ -5,7 +5,11 @@ var $ = require('gulp-load-plugins')({
 var runSequence = require('run-sequence');
 
 var jsSources = [
-	'angular/**/*.js'
+	'angular/rs-auth-module.js',
+	'angular/rs-auth-constant.js',
+	'angular/rs-auth-session-provider.js',
+	'angular/rs-auth-provider.js',
+	'angular/rs-auth-run.js',
 ]
 
 gulp.task('jshint', function () {
