@@ -6,7 +6,11 @@
 app.provider('$rsAuth', function $rsAuth() {
 
   var config = {
-    apiPrefix: ''
+    authUrl: '',
+    loginEndPoint: '/auth',
+    registerEndPoint: '/register',
+    validateEndPoint: '/auth',
+    logoutEndPoint: '/logout',
   };
   
   var userRoles = {
@@ -16,8 +20,20 @@ app.provider('$rsAuth', function $rsAuth() {
   };
 
   this.setConfig = function(configObj) {
-    if (configObj.apiPrefix) {
-      config.apiPrefix = configObj.apiPrefix;
+    if (configObj.authUrl) {
+      config.authUrl = configObj.authUrl;
+    }
+    if (configObj.loginEndPoint) {
+      config.loginEndPoint = configObj.loginEndPoint;
+    }
+    if (configObj.logoutEndPoint) {
+      config.logoutEndPoint = configObj.logoutEndPoint;
+    }
+    if (configObj.validateEndPoint) {
+      config.validateEndPoint = configObj.validateEndPoint;
+    }
+    if (configObj.registerEndPoint) {
+      config.registerEndPoint = configObj.registerEndPoint;
     }
   };
 
@@ -30,9 +46,9 @@ app.provider('$rsAuth', function $rsAuth() {
       //Post method for Login Authorization.
       //Arguments: Object formatted as such: {username:"test@test.ca",password:"testpass"}
       //Returns: $http promise object.
-      login: function (url,credentials) {
+      login: function (credentials) {
         return $http({
-          url: config.apiPrefix + url, 
+          url: config.authUrl + config.loginEndPoint, 
           method: "POST",
           data: credentials
         }).then(function (res) {
@@ -46,9 +62,9 @@ app.provider('$rsAuth', function $rsAuth() {
         });
       },
 
-      logout: function(url) {
+      logout: function() {
         return $http({
-          url: config.apiPrefix + url, 
+          url: config.authUrl + config.logoutEndPoint, 
           method: "GET",
           headers: {'X-Auth-Token': $rsSession.get('authToken')}
         }).then(function (res) {
@@ -56,9 +72,9 @@ app.provider('$rsAuth', function $rsAuth() {
         });
       },
 
-      register: function(url,credentials) {
+      register: function(credentials) {
         return $http({
-          url: config.apiPrefix + url, 
+          url: config.authUrl + config.registerEndPoint, 
           method: "POST",
           data: credentials
         }).then(function (res) {
@@ -69,9 +85,9 @@ app.provider('$rsAuth', function $rsAuth() {
         });
       },
 
-      validateToken: function(url,authToken) {
+      validateToken: function(authToken) {
         return $http({
-          url: config.apiPrefix + url, 
+          url: config.authUrl + config.validateEndPoint, 
           method: "GET",
           headers: {'X-Auth-Token': authToken}
         }).then(function (res) {

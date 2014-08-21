@@ -1,4 +1,4 @@
-app.run(['$rsSession','AUTH_EVENTS','$timeout','$rootScope','$rsAuth', function($rsSession,AUTH_EVENTS,titleBannerService,flashService,$timeout,$rootScope,$rsAuth) {
+app.run(['$rsSession','AUTH_EVENTS','$timeout','$rootScope','$rsAuth', function($rsSession,AUTH_EVENTS,$timeout,$rootScope,$rsAuth) {
 
 	//Check to see if the session is remembered, and then check to see if the login should be remembered globally.
 	if ($rsAuth.isAuthenticated()) {
