@@ -1,5 +1,4 @@
 var app = angular.module('rs-auth');
-
 /**
 * Session Service
 * author: Jamie Spittal james@randomshapes.ca
@@ -20,9 +19,6 @@ app.service('$rsSession', ['$window',function ($window) {
     };
     this.unset = function(key) {
       $window.sessionStorage.removeItem(key);
-    };
-    this.remembered = function() {
-      return !!$window.sessionStorage.getItem('authToken');
     };
 
     this.setLocalAuth = function(authToken) {

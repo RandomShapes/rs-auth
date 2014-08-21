@@ -5,15 +5,16 @@ var app = angular.module('rs-auth');
 * author: Jamie Spittal james@randomshapes.ca
 * Includes methods for authenticating the user.
 */
-app.provider('$rsAuth', function () {
+app.provider('$rsAuth', function $rsAuth() {
 
   var config = {
     apiPrefix: ''
   };
   
   var userRoles = {
-    visitor: 'user-visitor',
-    member: 'user-member'
+    all: '*',
+    member: 'user-member',
+    visitor: 'user-visitor'
   };
 
   this.setConfig = function(configObj) {
@@ -98,7 +99,12 @@ app.provider('$rsAuth', function () {
         return (this.isAuthenticated() && authorizedRoles.indexOf($rsSession.get('userRole')) !== -1);
       },
 
-      userRoles: userRoles
+      getUser: function() {
+        return $rsSession.getUser();
+      },
+
+      userRoles: userRoles,
+
     };
   };
 });
