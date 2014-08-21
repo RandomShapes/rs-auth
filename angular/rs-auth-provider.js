@@ -20,20 +20,8 @@ app.provider('$rsAuth', function $rsAuth() {
   };
 
   this.setConfig = function(configObj) {
-    if (configObj.authUrl) {
-      config.authUrl = configObj.authUrl;
-    }
-    if (configObj.loginEndPoint) {
-      config.loginEndPoint = configObj.loginEndPoint;
-    }
-    if (configObj.logoutEndPoint) {
-      config.logoutEndPoint = configObj.logoutEndPoint;
-    }
-    if (configObj.validateEndPoint) {
-      config.validateEndPoint = configObj.validateEndPoint;
-    }
-    if (configObj.registerEndPoint) {
-      config.registerEndPoint = configObj.registerEndPoint;
+    for (prop in configObj) {
+      config[prop] = configObj[prop];
     }
   };
 
