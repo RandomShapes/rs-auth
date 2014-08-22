@@ -178,7 +178,7 @@ app.run(['AUTH_EVENTS','$rootScope','$rsAuth', function(AUTH_EVENTS,$rootScope,$
 		};
 
 		//Get the authorized roles from the $stateProvider, look below at config to see where they are declared
-		if(args.data.authorizedRoles) {
+		if(args.data && args.data.authorizedRoles) {
 			authorizedRoles = args.data.authorizedRoles;
 		}
 		//Do a check to make sure that's it's not ALL and that they are authorized.
