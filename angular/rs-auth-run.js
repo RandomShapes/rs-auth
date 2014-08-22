@@ -1,8 +1,8 @@
-app.run(['$rsSession','AUTH_EVENTS','$timeout','$rootScope','$rsAuth', function($rsSession,AUTH_EVENTS,$timeout,$rootScope,$rsAuth) {
+app.run(['AUTH_EVENTS','$rootScope','$rsAuth', function(AUTH_EVENTS,$rootScope,$rsAuth) {
 
 	//Check to see if the session is remembered, and then check to see if the login should be remembered globally.
 	if ($rsAuth.isAuthenticated()) {
-		$timeout(function() {
+		$rootScope.$on('$viewContentLoaded',function() {
 			$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
 		});
 	} else if (!!$rsAuth.isRemembered()) { //If the session is remembered globally, validate the token make sure it's clean.
