@@ -1,46 +1,98 @@
+(function(angular) {
 var app = angular.module('rs-auth', []);
+var config = {
+  authUrl: '',
+  loginEndPoint: '/auth',
+  registerEndPoint: '/register',
+  validateEndPoint: '/auth',
+  logoutEndPoint: '/logout',
+  user: 'currentUser'
+};
+
+var userRoles = {
+  all: '*'
+};
+
 app.constant('AUTH_EVENTS', {
-	  loginSuccess: 'auth-login-success',
-	  loginFailed: 'auth-login-failed',
-	  logoutSuccess: 'auth-logout-success',
-	  sessionTimeout: 'auth-session-timeout',
-	  notAuthenticated: 'auth-not-authenticated',
-	  notAuthorized: 'auth-not-authorized'
-	});
-/**
-* Session Service
-* author: Jamie Spittal james@randomshapes.ca
-* Methods for getting and setting current session variables. Also, used for recalling a remembered session.
-*/
-app.service('$rsSession', ['$window',function ($window) {
-    this.set = function(key,value) {
-      $window.sessionStorage.setItem(key,value);
-    };
-    this.get = function(key) {
-      return $window.sessionStorage.getItem(key);
-    };
-    this.setUser = function(value) {
-      $window.sessionStorage.setItem('user',JSON.stringify(value));
-    };
-    this.getUser = function() {
-      return JSON.parse($window.sessionStorage.getItem('user'));
-    };
-    this.unset = function(key) {
-      $window.sessionStorage.removeItem(key);
-    };
+  loginSuccess: '$authLoginSuccess',
+  loginFailed: '$authLoginFailed',
+  logoutSuccess: '$authLogoutSuccess',
+  sessionTimeout: '$authSessionTimeout',
+  notAuthenticated: '$authNotAuthenticated',
+  notAuthorized: '$authNotAuthorized'
+});
+app.factory('Local', ['$http','$window','$rootScope',function($http,$window,$rootScope) {
+	var local = {};
 
-    this.setLocalAuth = function(authToken) {
-      $window.localStorage.setItem('authToken', authToken);
-    };
-    this.getLocalAuth = function() {
-      return $window.localStorage.getItem('authToken');
-    };
+	local.login = function (credentials) {
+	  return $http({
+	    url: config.authUrl + config.loginEndPoint, 
+	    method: "POST",
+	    data: credentials
+	  }).then(function (res) {
+	    if (credentials.remember) {
+	      $window.localStorage.setItem('authToken',res.data.token);
+	    }
+	    $window.sessionStorage.setItem('authToken',res.data.token);
+	    $rootScope[config.user] = res.data.user;
+	    return res;
+	  });
+	};
 
-    //Clears everything in local and session storage.
-    this.clear = function() {
-      $window.sessionStorage.clear();
-      $window.localStorage.clear();
-    };
+	local.logout = function() {
+	  return $http({
+	    url: config.authUrl + config.logoutEndPoint, 
+	    method: "GET",
+	    headers: {'X-Auth-Token': $window.sessionStorage.getItem('authToken')}
+	  }).then(function (res) {
+	    $window.localStorage.clear();
+	    $window.sessionStorage.clear();
+	  });
+	};
+
+	local.register = function(credentials) {
+	  return $http({
+	    url: config.authUrl + config.registerEndPoint, 
+	    method: "POST",
+	    data: credentials
+	  }).then(function (res) {
+	    $window.sessionStorage.setItem('authToken',res.data.token);
+	    $rootScope[config.user] = res.data.user;
+	    return res;
+	  });
+	};
+
+	local.validateToken = function(authToken) {
+	  return $http({
+	    url: config.authUrl + config.validateEndPoint, 
+	    method: "GET",
+	    headers: {'X-Auth-Token': authToken}
+	  }).then(function (res) {
+	  	$window.sessionStorage.setItem('authToken',res.data.token);
+	  	$rootScope[config.user] = res.data.user;
+	    return res;
+	  });
+	};
+
+	local.isAuthenticated = function() {
+	  return !!$window.sessionStorage.getItem('authToken');
+	};
+
+	//Check the userRole and make sure it's correct.
+	local.isAuthorized = function(authorizedRoles) {
+
+	  if (!angular.isArray(authorizedRoles)) {
+	    authorizedRoles = [authorizedRoles];
+	  }
+
+	  return (this.isAuthenticated() && authorizedRoles.indexOf($rootScope[config.user].role) !== -1);
+	};
+
+	local.isRemembered = function() {
+		return $window.localStorage.getItem('authToken');
+	};
+
+	return local;
 }]);
 /**
 * rsAuth
@@ -49,120 +101,44 @@ app.service('$rsSession', ['$window',function ($window) {
 */
 app.provider('$rsAuth', function $rsAuth() {
 
-  var config = {
-    authUrl: '',
-    loginEndPoint: '/auth',
-    registerEndPoint: '/register',
-    validateEndPoint: '/auth',
-    logoutEndPoint: '/logout',
-  };
-  
-  var userRoles = {
-    all: '*',
-    member: 'user-member',
-    visitor: 'user-visitor'
-  };
-
-  this.setConfig = function(configObj) {
-    if (configObj.authUrl) {
-      config.authUrl = configObj.authUrl;
-    }
-    if (configObj.loginEndPoint) {
-      config.loginEndPoint = configObj.loginEndPoint;
-    }
-    if (configObj.logoutEndPoint) {
-      config.logoutEndPoint = configObj.logoutEndPoint;
-    }
-    if (configObj.validateEndPoint) {
-      config.validateEndPoint = configObj.validateEndPoint;
-    }
-    if (configObj.registerEndPoint) {
-      config.registerEndPoint = configObj.registerEndPoint;
-    }
-  };
+  this.config = config;
+  this.userRoles = userRoles;
 
   this.setUserRoles = function(userRolesObj) {
-    userRoles = userRolesObj;
+    angular.extend(userRoles,userRolesObj);
   };
 
-  this.$get = function rsAuthFactory($http,$rsSession) {
+  this.$get = function rsAuthFactory($http,Local) {
     return {
-      //Post method for Login Authorization.
-      //Arguments: Object formatted as such: {username:"test@test.ca",password:"testpass"}
-      //Returns: $http promise object.
       login: function (credentials) {
-        return $http({
-          url: config.authUrl + config.loginEndPoint, 
-          method: "POST",
-          data: credentials
-        }).then(function (res) {
-          if (credentials.remember) {
-            $rsSession.setLocalAuth(res.data.token);
-          }
-          $rsSession.set('authToken',res.data.token);
-          $rsSession.set('userRole',res.data.user.status);
-          $rsSession.setUser(res.data.user);
-          return res;
-        });
+        return Local.login(credentials);
       },
 
       logout: function() {
-        return $http({
-          url: config.authUrl + config.logoutEndPoint, 
-          method: "GET",
-          headers: {'X-Auth-Token': $rsSession.get('authToken')}
-        }).then(function (res) {
-          $rsSession.clear();
-        });
+        return Local.logout();
       },
 
       register: function(credentials) {
-        return $http({
-          url: config.authUrl + config.registerEndPoint, 
-          method: "POST",
-          data: credentials
-        }).then(function (res) {
-          $rsSession.set('authToken',res.data.token);
-          $rsSession.set('userRole','user');
-          $rsSession.setUser(res.data.user);
-          return res;
-        });
+        return Local.register();
       },
 
       validateToken: function(authToken) {
-        return $http({
-          url: config.authUrl + config.validateEndPoint, 
-          method: "GET",
-          headers: {'X-Auth-Token': authToken}
-        }).then(function (res) {
-          $rsSession.set('authToken',authToken);
-          $rsSession.set('userRole','user');
-          $rsSession.setUser(res.data);
-          return res;
-        });
+        return Local.validateToken(authToken);
       },
 
-      //Checking to see if they are logged in.
       isAuthenticated: function() {
-        return !!$rsSession.get('authToken');
+        return Local.isAuthenticated();
       },
 
-      //Check their userRole and make sure it's correct.
       isAuthorized: function(authorizedRoles) {
-
-        if (!angular.isArray(authorizedRoles)) {
-          authorizedRoles = [authorizedRoles];
-        }
-
-        return (this.isAuthenticated() && authorizedRoles.indexOf($rsSession.get('userRole')) !== -1);
+        return Local.isAuthenticated(authorizedRoles);
       },
 
-      getUser: function() {
-        return $rsSession.getUser();
+      isRemembered: function() {
+        return Local.isRemembered();
       },
 
-      userRoles: userRoles,
-
+      userRoles: userRoles
     };
   };
 });
@@ -173,37 +149,41 @@ app.run(['$rsSession','AUTH_EVENTS','$timeout','$rootScope','$rsAuth', function(
 		$timeout(function() {
 			$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
 		});
-	} else if (!!$rsSession.getLocalAuth()) { //If the session is remembered globally, validate the token make sure it's clean.
-		var authToken = $rsSession.getLocalAuth();
+	} else if (!!$rsAuth.isRemembered()) { //If the session is remembered globally, validate the token make sure it's clean.
+		var authToken = $rsAuth.isRemembered();
 		$rsAuth.validateToken(authToken).then(function() {
 			$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
 		});
 	}
 
-	//Listen for when the state changes (basically a url change) then check the user-role and see if
+	//Listen for when the state changes then check the user-role and see if
 	//the user is authorized to see the content
+
+	//TODO: Check for more than just first entry for ALL.
+	//TODO: Native Angular support, not UI.Router
 	$rootScope.$on('$stateChangeStart', function (event, args) {
+		var authorizedRoles = {
+			all: "*"
+		};
 
-	var authorizedRoles = {
-		all: "*"
-	};
-
-	//Get the authorized roles from the $stateProvider, look below at config to see where they are declared
-	if(args.data.authorizedRoles) {
-		authorizedRoles = args.data.authorizedRoles;
-	}
-	//Do a check to make sure that's it's not ALL and that they are authorized.
-	if (authorizedRoles[0] !== $rsAuth.userRoles.all && !$rsAuth.isAuthorized(authorizedRoles)) {
-		//If they are not authorized, prevent the default event, which is go to it.
-		event.preventDefault();
-		if ($rsAuth.isAuthenticated()) {
-			//If you're logged in but you're not authenticated to see the content.
-			$rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
-		} else {
-		//If they are not logged in at all, redirect them to home ($state.go('home')) and tell them they are stupid for trying.
-		$rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+		//Get the authorized roles from the $stateProvider, look below at config to see where they are declared
+		if(args.data.authorizedRoles) {
+			authorizedRoles = args.data.authorizedRoles;
 		}
-	}
+		//Do a check to make sure that's it's not ALL and that they are authorized.
+		if (authorizedRoles[0] !== $rsAuth.userRoles.all && !$rsAuth.isAuthorized(authorizedRoles)) {
+			//If they are not authorized, prevent the default event, which is go to it.
+			event.preventDefault();
+			if ($rsAuth.isAuthenticated()) {
+				//If you're logged in but you're not authenticated to see the content.
+				$rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
+			} else {
+			//If they are not logged in at all, redirect them to home ($state.go('home')) and tell them they are stupid for trying.
+			$rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+			}
+		}
 	});
 
 }]);
+
+})(window.angular) //This starts in the module.

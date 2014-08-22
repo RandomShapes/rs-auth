@@ -5,108 +5,44 @@
 */
 app.provider('$rsAuth', function $rsAuth() {
 
-  var config = {
-    authUrl: '',
-    loginEndPoint: '/auth',
-    registerEndPoint: '/register',
-    validateEndPoint: '/auth',
-    logoutEndPoint: '/logout',
-  };
-  
-  var userRoles = {
-    all: '*',
-    member: 'user-member',
-    visitor: 'user-visitor'
-  };
-
-  this.setConfig = function(configObj) {
-    for (prop in configObj) {
-      config[prop] = configObj[prop];
-    }
-  };
+  this.config = config;
+  this.userRoles = userRoles;
 
   this.setUserRoles = function(userRolesObj) {
-    userRoles = userRolesObj;
+    angular.extend(userRoles,userRolesObj);
   };
 
-  this.$get = function rsAuthFactory($http,$rsSession) {
+  this.$get = function rsAuthFactory($http,Local) {
     return {
-      //Post method for Login Authorization.
-      //Arguments: Object formatted as such: {username:"test@test.ca",password:"testpass"}
-      //Returns: $http promise object.
       login: function (credentials) {
-        return $http({
-          url: config.authUrl + config.loginEndPoint, 
-          method: "POST",
-          data: credentials
-        }).then(function (res) {
-          if (credentials.remember) {
-            $rsSession.setLocalAuth(res.data.token);
-          }
-          $rsSession.set('authToken',res.data.token);
-          $rsSession.set('userRole',res.data.user.status);
-          $rsSession.setUser(res.data.user);
-          return res;
-        });
+        return Local.login(credentials);
       },
 
       logout: function() {
-        return $http({
-          url: config.authUrl + config.logoutEndPoint, 
-          method: "GET",
-          headers: {'X-Auth-Token': $rsSession.get('authToken')}
-        }).then(function (res) {
-          $rsSession.clear();
-        });
+        return Local.logout();
       },
 
       register: function(credentials) {
-        return $http({
-          url: config.authUrl + config.registerEndPoint, 
-          method: "POST",
-          data: credentials
-        }).then(function (res) {
-          $rsSession.set('authToken',res.data.token);
-          $rsSession.set('userRole','user');
-          $rsSession.setUser(res.data.user);
-          return res;
-        });
+        return Local.register();
       },
 
       validateToken: function(authToken) {
-        return $http({
-          url: config.authUrl + config.validateEndPoint, 
-          method: "GET",
-          headers: {'X-Auth-Token': authToken}
-        }).then(function (res) {
-          $rsSession.set('authToken',authToken);
-          $rsSession.set('userRole','user');
-          $rsSession.setUser(res.data);
-          return res;
-        });
+        return Local.validateToken(authToken);
       },
 
-      //Checking to see if they are logged in.
       isAuthenticated: function() {
-        return !!$rsSession.get('authToken');
+        return Local.isAuthenticated();
       },
 
-      //Check their userRole and make sure it's correct.
       isAuthorized: function(authorizedRoles) {
-
-        if (!angular.isArray(authorizedRoles)) {
-          authorizedRoles = [authorizedRoles];
-        }
-
-        return (this.isAuthenticated() && authorizedRoles.indexOf($rsSession.get('userRole')) !== -1);
+        return Local.isAuthenticated(authorizedRoles);
       },
 
-      getUser: function() {
-        return $rsSession.getUser();
+      isRemembered: function() {
+        return Local.isRemembered();
       },
 
-      userRoles: userRoles,
-
+      userRoles: userRoles
     };
   };
 });
