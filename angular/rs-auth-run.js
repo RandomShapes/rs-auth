@@ -16,6 +16,14 @@ app.run(['AUTH_EVENTS','$rootScope','$rsAuth', function(AUTH_EVENTS,$rootScope,$
 
 	//Listen for when the state changes then check the user-role and see if
 	//the user is authorized to see the content
+	var checkForAll = function(authorizedRoles) {
+		for (prop in authorizedRoles) {
+			if (authorizedRoles[prop] === "*") {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	//TODO: Check for more than just first entry for ALL.
 	//TODO: Native Angular support, not UI.Router
@@ -29,7 +37,7 @@ app.run(['AUTH_EVENTS','$rootScope','$rsAuth', function(AUTH_EVENTS,$rootScope,$
 			authorizedRoles = args.data.authorizedRoles;
 		}
 		//Do a check to make sure that's it's not ALL and that they are authorized.
-		if (authorizedRoles[0] !== $rsAuth.userRoles.all && !$rsAuth.isAuthorized(authorizedRoles)) {
+		if (!checkForAll(authorizedRoles) && !$rsAuth.isAuthorized(authorizedRoles)) {
 			//If they are not authorized, prevent the default event, which is go to it.
 			event.preventDefault();
 			if ($rsAuth.isAuthenticated()) {
