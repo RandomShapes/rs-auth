@@ -12,7 +12,7 @@ app.provider('$rsAuth', function $rsAuth() {
     angular.extend(userRoles,userRolesObj);
   };
 
-  this.$get = function rsAuthFactory(Local) {
+  this.$get = ['Local', function rsAuthFactory(Local) {
     return {
       login: function (credentials) {
         return Local.login(credentials);
@@ -48,5 +48,5 @@ app.provider('$rsAuth', function $rsAuth() {
 
       userRoles: userRoles
     };
-  };
+  }];
 });
