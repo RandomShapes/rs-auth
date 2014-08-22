@@ -47,6 +47,7 @@ app.factory('Local', ['$http','$window','$rootScope',function($http,$window,$roo
 	  }).then(function (res) {
 	    $window.localStorage.clear();
 	    $window.sessionStorage.clear();
+	    $rootScope[config.user] = null;
 	  });
 	};
 
@@ -68,14 +69,14 @@ app.factory('Local', ['$http','$window','$rootScope',function($http,$window,$roo
 	    method: "GET",
 	    headers: {'X-Auth-Token': authToken}
 	  }).then(function (res) {
-	  	$window.sessionStorage.setItem('authToken',res.data.token);
-	  	$rootScope[config.user] = res.data.user;
+	  	$window.sessionStorage.setItem('authToken',authToken);
+	  	$rootScope[config.user] = res.data;
 	    return res;
 	  });
 	};
 
-	local.isAuthenticated = function() {
-	  return !!$window.sessionStorage.getItem('authToken');
+	local.isAuthenticated = function() { //Does the same thing as getToken, but for sake of clarity It's here.
+	  return $window.sessionStorage.getItem('authToken');
 	};
 
 	//Check the userRole and make sure it's correct.
@@ -92,13 +93,17 @@ app.factory('Local', ['$http','$window','$rootScope',function($http,$window,$roo
 		return $window.localStorage.getItem('authToken');
 	};
 
+	local.getToken = function() {
+		return $window.sessionStorage.getItem('authToken');
+	};
+
 	return local;
 }]);
 /**
 * rsAuth
 * author: Jamie Spittal james@randomshapes.ca
 * Includes methods for authenticating the user.
-*/
+**/
 app.provider('$rsAuth', function $rsAuth() {
 
   this.config = config;
@@ -138,19 +143,25 @@ app.provider('$rsAuth', function $rsAuth() {
         return Local.isRemembered();
       },
 
+      getToken: function() {
+        return Local.getToken();
+      },
+
       userRoles: userRoles
     };
   };
 });
 app.run(['AUTH_EVENTS','$rootScope','$rsAuth', function(AUTH_EVENTS,$rootScope,$rsAuth) {
-
+	var authToken;
 	//Check to see if the session is remembered, and then check to see if the login should be remembered globally.
-	if ($rsAuth.isAuthenticated()) {
-		$rootScope.$on('$viewContentLoaded',function() {
+	if (!!$rsAuth.isAuthenticated()) {
+		authToken = $rsAuth.isAuthenticated();
+		$rsAuth.validateToken(authToken).then(function() {
 			$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
 		});
+
 	} else if (!!$rsAuth.isRemembered()) { //If the session is remembered globally, validate the token make sure it's clean.
-		var authToken = $rsAuth.isRemembered();
+		authToken = $rsAuth.isRemembered();
 		$rsAuth.validateToken(authToken).then(function() {
 			$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
 		});

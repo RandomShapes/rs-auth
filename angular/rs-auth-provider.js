@@ -2,7 +2,7 @@
 * rsAuth
 * author: Jamie Spittal james@randomshapes.ca
 * Includes methods for authenticating the user.
-*/
+**/
 app.provider('$rsAuth', function $rsAuth() {
 
   this.config = config;
@@ -40,6 +40,10 @@ app.provider('$rsAuth', function $rsAuth() {
 
       isRemembered: function() {
         return Local.isRemembered();
+      },
+
+      getToken: function() {
+        return Local.getToken();
       },
 
       userRoles: userRoles

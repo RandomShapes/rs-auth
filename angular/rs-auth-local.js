@@ -24,6 +24,7 @@ app.factory('Local', ['$http','$window','$rootScope',function($http,$window,$roo
 	  }).then(function (res) {
 	    $window.localStorage.clear();
 	    $window.sessionStorage.clear();
+	    $rootScope[config.user] = null;
 	  });
 	};
 
@@ -45,14 +46,14 @@ app.factory('Local', ['$http','$window','$rootScope',function($http,$window,$roo
 	    method: "GET",
 	    headers: {'X-Auth-Token': authToken}
 	  }).then(function (res) {
-	  	$window.sessionStorage.setItem('authToken',res.data.token);
-	  	$rootScope[config.user] = res.data.user;
+	  	$window.sessionStorage.setItem('authToken',authToken);
+	  	$rootScope[config.user] = res.data;
 	    return res;
 	  });
 	};
 
-	local.isAuthenticated = function() {
-	  return !!$window.sessionStorage.getItem('authToken');
+	local.isAuthenticated = function() { //Does the same thing as getToken, but for sake of clarity It's here.
+	  return $window.sessionStorage.getItem('authToken');
 	};
 
 	//Check the userRole and make sure it's correct.
@@ -67,6 +68,10 @@ app.factory('Local', ['$http','$window','$rootScope',function($http,$window,$roo
 
 	local.isRemembered = function() {
 		return $window.localStorage.getItem('authToken');
+	};
+
+	local.getToken = function() {
+		return $window.sessionStorage.getItem('authToken');
 	};
 
 	return local;
