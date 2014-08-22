@@ -23,7 +23,7 @@ app.provider('$rsAuth', function $rsAuth() {
       },
 
       register: function(credentials) {
-        return Local.register();
+        return Local.register(credentials);
       },
 
       validateToken: function(authToken) {
