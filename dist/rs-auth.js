@@ -1,5 +1,6 @@
-(function(angular) {
+(function() { 
 var app = angular.module('rs-auth', []);
+
 var config = {
   authUrl: '',
   loginEndPoint: '/auth',
@@ -21,6 +22,7 @@ app.constant('AUTH_EVENTS', {
   notAuthenticated: '$authNotAuthenticated',
   notAuthorized: '$authNotAuthorized'
 });
+
 app.factory('Local', ['$http','$window','$rootScope',function($http,$window,$rootScope) {
 	var local = {};
 
@@ -99,6 +101,7 @@ app.factory('Local', ['$http','$window','$rootScope',function($http,$window,$roo
 
 	return local;
 }]);
+
 /**
 * rsAuth
 * author: Jamie Spittal james@randomshapes.ca
@@ -151,7 +154,11 @@ app.provider('$rsAuth', function $rsAuth() {
     };
   }];
 });
+
 app.run(['AUTH_EVENTS','$rootScope','$rsAuth', function(AUTH_EVENTS,$rootScope,$rsAuth) {
+	$rootScope[config.user] = {};
+
+
 	var authToken;
 	//Check to see if the session is remembered, and then check to see if the login should be remembered globally.
 	if (!!$rsAuth.isAuthenticated()) {
@@ -170,13 +177,13 @@ app.run(['AUTH_EVENTS','$rootScope','$rsAuth', function(AUTH_EVENTS,$rootScope,$
 	//Listen for when the state changes then check the user-role and see if
 	//the user is authorized to see the content
 	var checkForAll = function(authorizedRoles) {
-		for (prop in authorizedRoles) {
+		for (var prop in authorizedRoles) {
 			if (authorizedRoles[prop] === "*") {
 				return true;
 			}
 		}
 		return false;
-	}
+	};
 
 	//TODO: Check for more than just first entry for ALL.
 	//TODO: Native Angular support, not UI.Router
@@ -204,5 +211,6 @@ app.run(['AUTH_EVENTS','$rootScope','$rsAuth', function(AUTH_EVENTS,$rootScope,$
 	});
 
 }]);
+ 
 
-})(window.angular) //This starts in the module.
+})();

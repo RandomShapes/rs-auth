@@ -3,38 +3,47 @@ var $ = require('gulp-load-plugins')({
     camelize: true
 });
 var runSequence = require('run-sequence');
-
-var jsSources = [
-	'angular/rs-auth-module.js',
-	'angular/rs-auth-config.js',
-	'angular/rs-auth-local.js',
-	'angular/rs-auth-provider.js',
-	'angular/rs-auth-run.js'
-]
+var browserSync = require('browser-sync');
+var reload = browserSync.reload;
 
 gulp.task('jshint', function () {
-  return gulp.src(jsSources)
-      .pipe($.jshint().on('error', $.util.log))
-      .pipe($.jshint.reporter('jshint-stylish'))
+	return gulp.src("app/angular/**/*.js")
+		.pipe($.jshint().on('error', $.util.log))
+		.pipe($.jshint.reporter('jshint-stylish'));
 });
 
-gulp.task('concat',function() {
-	return gulp.src(jsSources)
-		.pipe($.concat('rs-auth.js').on('error', $.util.log))
-		.pipe(gulp.dest('./dist/'))
+gulp.task('concat', function() {
+	return gulp.src("app/angular/**/*.js")
+		.pipe($.sourcemaps.init())
+		.pipe($.concat('rs-auth.js'))
+		.pipe($.wrap({ src: 'app/angular-wrap-template.txt'}))
+		.pipe($.sourcemaps.write())
+		.pipe(gulp.dest('dist'))
 });
 
 gulp.task('minify', function() {
-	return gulp.src(jsSources)
-		.pipe($.concat('rs-auth.min.js').on('error', $.util.log))
-		.pipe($.uglify().on('error', $.util.log))
-		.pipe(gulp.dest('./dist/'))
+	return gulp.src("dist/rs-auth.js")
+		.pipe($.uglify())
+		.pipe($.rename('rs-auth.min.js'))
+		.pipe(gulp.dest('dist'))
+});
+
+gulp.task('serve', function() {
+	browserSync({
+	  notify: false,
+	  server: {
+	  	baseDir: ["app","dist"],
+	  }
+	});
+
+	gulp.watch(['app/**/*.html'], reload);
+	gulp.watch(['app/angular/**/*.js'], ['jshint','concat',reload]);
 });
 
 gulp.task('build', function() {
-  runSequence('jshint',['concat','minify']);
+ 	runSequence('jshint',['concat','minify']);
 });
 
 gulp.task('default', [
-  'build'
+	'serve'
 ]);
