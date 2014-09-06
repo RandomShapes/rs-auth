@@ -14,5 +14,9 @@
     "User",
     "Role"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "angular": "~1.2.23",
+    "bootstrap": "~3.2.0"
+  }
 }

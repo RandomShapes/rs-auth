@@ -1,4 +1,4 @@
-var gulp = require('gulp');
+	var gulp = require('gulp');
 var $ = require('gulp-load-plugins')({
     camelize: true
 });
@@ -15,7 +15,10 @@ gulp.task('jshint', function () {
 gulp.task('concat', function() {
 	return gulp.src("app/angular/**/*.js")
 		.pipe($.sourcemaps.init())
-		.pipe($.concat('rs-auth.js'))
+		.pipe($.concat('rs-auth.js').on('error', $.util.log))
+		.pipe($.ngAnnotate({
+            add: true
+        }).on('error', $.util.log))
 		.pipe($.wrap({ src: 'app/angular-wrap-template.txt'}))
 		.pipe($.sourcemaps.write())
 		.pipe(gulp.dest('dist'))
@@ -45,5 +48,7 @@ gulp.task('build', function() {
 });
 
 gulp.task('default', [
+	'jshint',
+	'concat',
 	'serve'
 ]);

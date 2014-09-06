@@ -1,6 +1,5 @@
-(function() { 
-var app = angular.module('rs-auth', []);
+(function(angular) { 
 
 <%= contents %> 
 
-})();
+})(angular);

@@ -1,20 +1,105 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="rsAuthApp">
 <head>
-	<meta charset="UTF-8">
-	<title>rsAuth</title>
+    <meta charset="UTF-8">
+    <title>rsAuth</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
 </head>
 <body>
-	
-	<h1>Rs Auth</h1>
+    
+    <section class="container" ng-controller="RsAuthCtrl as vm">
+        <h1 class="jumbotron">rs-auth, the best auth system... ever?</h1>
 
-	<script src="rs-auth.js"></script>
-	<script>
-	(function() {
-		angular
-			.module('rsAuthApp', ['rsAuth'])
+        <div class="form-group">
+            <label>Email</label>
+            <input type="text" class="form-control" ng-model="loginEmail" placeholder="Login Email" />
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" class="form-control" ng-model="loginPassword" placeholder="Login Password" />
+        </div>
+        <button class="btn btn-primary" ng-click="vm.login(loginEmail,loginPassword)">Test Login</button>
+        <div class="panel panel-default">
+            <div class="panel-heading">Login Response</div>
+            <div class="panel-body">
+                {{vm.loginResponse}}
+            </div>
+        </div>
 
-	})();
-	</script>
+        <button class="btn btn-primary" ng-click="vm.logout()">Test Logout</button>
+        <div class="panel panel-default">
+            <div class="panel-heading">Logout Response</div>
+            <div class="panel-body">
+                Did I log out?: {{vm.logoutResponse}}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="text" class="form-control" ng-model="registerEmail" placeholder="Register Email" />
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" class="form-control" ng-model="registerPassword" placeholder="Register Password" />
+        </div>
+        <button class="btn btn-primary" ng-click="vm.register(registerEmail,registerPassword)">Test Register</button>
+        <div class="panel panel-default">
+            <div class="panel-heading">Register Response</div>
+            <div class="panel-body">
+                {{vm.registerResponse}}
+            </div>
+        </div>
+    </section>
+
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="rs-auth.js"></script>
+    <script>
+    (function() {
+        angular
+            .module('rsAuthApp', ['rs-auth'])
+            .config(rsAuthAppConfig)
+            .controller('RsAuthCtrl', RsAuthCtrl);
+
+        function rsAuthAppConfig($rsAuthProvider) {
+            $rsAuthProvider.config.authUrl = "http://dogandponydata.site/api/v1/account";
+        }
+
+        function RsAuthCtrl($rsAuth) {
+            var vm = this;
+
+            vm.login = login;
+            vm.logout = logout;
+            vm.register = register;
+
+            function login(username,password) {
+                $rsAuth.login({
+                    username: username,
+                    password: password
+                }).then(
+                function(data) {
+                    vm.loginResponse = data;
+                })
+            }
+
+            function logout() {
+                $rsAuth.logout().then(
+                function(data) {
+                    vm.logoutResponse = "not sure Matt is an idiot and needs to return better things from the server.";
+                })
+            }
+
+            function register(username,password) {
+                $rsAuth.register({
+                    username: username,
+                    password: password
+                }).then(
+                function(data) {
+                    vm.registerResponse = data;
+                })
+            }
+        }
+
+    })();
+    </script>
 </body>
 </html>

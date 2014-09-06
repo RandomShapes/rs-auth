@@ -1,78 +1,109 @@
-app.factory('Local', ['$http','$window','$rootScope',function($http,$window,$rootScope) {
-	var local = {};
+function Local($http,$window,$rootScope) {
+    return {
+        login: login,
+        logout: logout,
+        register: register,
+        validateToken: validateToken,
+        isAuthenticated: isAuthenticated,
+        isAuthorized: isAuthorized,
+        isRemembered: isAuthenticated,
+        getToken: isAuthenticated
+    };
 
-	local.login = function (credentials) {
-	  return $http({
-	    url: config.authUrl + config.loginEndPoint, 
-	    method: "POST",
-	    data: credentials
-	  }).then(function (res) {
-	    if (credentials.remember) {
-	      $window.localStorage.setItem('authToken',res.data.token);
-	    }
-	    $window.sessionStorage.setItem('authToken',res.data.token);
-	    $rootScope[config.user] = res.data.user;
-	    return res;
-	  });
-	};
+    function login(credentials) {
+        return $http({
+            url: config.authUrl + config.loginEndPoint, 
+            method: "POST",
+            data: credentials
+        })
+        .then(loginSuccess)
+        .catch(loginFail);
 
-	local.logout = function() {
-	  return $http({
-	    url: config.authUrl + config.logoutEndPoint, 
-	    method: "GET",
-	    headers: {'X-Auth-Token': $window.sessionStorage.getItem('authToken')}
-	  }).then(function (res) {
-	    $window.localStorage.clear();
-	    $window.sessionStorage.clear();
-	    $rootScope[config.user] = null;
-	  });
-	};
+        function loginSuccess(res) {
+            if (credentials.remember) {
+                $window.localStorage.setItem('authToken',res.data.token);
+            }
+            $window.sessionStorage.setItem('authToken',res.data.token);
+            $rootScope[config.user] = res.data.user;
+            return res;
+        }
 
-	local.register = function(credentials) {
-	  return $http({
-	    url: config.authUrl + config.registerEndPoint, 
-	    method: "POST",
-	    data: credentials
-	  }).then(function (res) {
-	    $window.sessionStorage.setItem('authToken',res.data.token);
-	    $rootScope[config.user] = res.data.user;
-	    return res;
-	  });
-	};
+        function loginFail(error) {
+            console.error("rs-auth login failed",error);
+        }
+    }
 
-	local.validateToken = function(authToken) {
-	  return $http({
-	    url: config.authUrl + config.validateEndPoint, 
-	    method: "GET",
-	    headers: {'X-Auth-Token': authToken}
-	  }).then(function (res) {
-	  	$window.sessionStorage.setItem('authToken',authToken);
-	  	$rootScope[config.user] = res.data;
-	    return res;
-	  });
-	};
+    function logout() {
+        return $http({
+            url: config.authUrl + config.logoutEndPoint, 
+            method: "GET",
+            headers: {'X-Auth-Token': $window.sessionStorage.getItem('authToken')}
+        })
+        .then(logoutSuccess)
+        .catch(logoutFail);
 
-	local.isAuthenticated = function() { //Does the same thing as getToken, but for sake of clarity It's here.
-	  return $window.sessionStorage.getItem('authToken');
-	};
+        function logoutSuccess(res) {
+            $window.localStorage.clear();
+            $window.sessionStorage.clear();
+            $rootScope[config.user] = null;
+        }
 
-	//Check the userRole and make sure it's correct.
-	local.isAuthorized = function(authorizedRoles) {
+        function logoutFail(error) {
+            console.error("rs-auth logout failed",error);
+        }
+    }
 
-	  if (!angular.isArray(authorizedRoles)) {
-	    authorizedRoles = [authorizedRoles];
-	  }
+    function register(credentials) {
+        return $http({
+            url: config.authUrl + config.registerEndPoint, 
+            method: "POST",
+            data: credentials
+        })
+        .then(registerSuccess)
+        .catch(registerFail);
 
-	  return (this.isAuthenticated() && authorizedRoles.indexOf($rootScope[config.user].role) !== -1);
-	};
+        function registerSuccess(res) {
+            $window.sessionStorage.setItem('authToken',res.data.token);
+            $rootScope[config.user] = res.data.user;
+            return res;
+        }
 
-	local.isRemembered = function() {
-		return $window.localStorage.getItem('authToken');
-	};
+        function registerFail(error) {
+            console.error("rs-auth register failed",error);
+        }
+    }
 
-	local.getToken = function() {
-		return $window.sessionStorage.getItem('authToken');
-	};
+    function validateToken(authToken) {
+        return $http({
+            url: config.authUrl + config.validateEndPoint, 
+            method: "GET",
+            headers: {'X-Auth-Token': authToken}
+        })
+        .then(validateTokenSuccess)
+        .catch(validateTokenFail);
 
-	return local;
-}]);
+        function validateTokenSuccess(res) {
+            $window.sessionStorage.setItem('authToken',authToken);
+            $rootScope[config.user] = res.data;
+            return res;
+        }
+
+        function validateTokenFail(error) {
+            console.error("rs-auth register failed",error);
+        }
+    }
+
+    //Check the userRole and make sure it's correct.
+    function isAuthorized(authorizedRoles) {
+
+        if (!angular.isArray(authorizedRoles)) {
+            authorizedRoles = [authorizedRoles];
+        }
+
+        return (authorizedRoles.indexOf($rootScope[config.user].role) !== -1);
+    }
+
+    function isAuthenticated() {
+        return $window.sessionStorage.getItem('authToken');
+    }
+}
