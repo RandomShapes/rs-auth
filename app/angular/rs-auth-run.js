@@ -39,8 +39,8 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
         return false;
     }
 
-    function checkAuthorization(event, passed) {
-        var args = passed;
+    function checkAuthorization(event, arguments) {
+        var args = arguments;
         if($rootScope[config.user]) {
             //This is the default is nothing was set in the config data object for $stateProvider
             var authorizedRoles = {
@@ -52,6 +52,7 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
                 authorizedRoles = args.data.authorizedRoles;
             }
 
+            debugger;
             //Do a check to make sure that's it's not ALL and that they are authorized.
             if (!checkForAll(authorizedRoles) && !$rsAuth.isAuthorized(authorizedRoles) && !!$rsAuth.isAuthenticated()) {
                 //prevent the default event, which is go to state.

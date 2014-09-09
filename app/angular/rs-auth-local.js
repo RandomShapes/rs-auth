@@ -95,12 +95,14 @@ function Local($http,$window,$rootScope) {
 
     //Check the userRole and make sure it's correct.
     function isAuthorized(authorizedRoles) {
-
         if (!angular.isArray(authorizedRoles)) {
             authorizedRoles = [authorizedRoles];
         }
 
-        return (authorizedRoles.indexOf($rootScope[config.user].role) !== -1);
+        //Dog And Pony fix, MATT
+        var role = $rootScope[config.user].role || $rootScope[config.user].status;
+
+        return (authorizedRoles.indexOf(role) !== -1);
     }
 
     function isAuthenticated() {

@@ -27,7 +27,7 @@ function AUTH_EVENTS() {
         sessionTimeout: '$authSessionTimeout',
         notAuthenticated: '$authNotAuthenticated',
         notAuthorized: '$authNotAuthorized'
-    }; 
+    } 
 }
 function Local($http,$window,$rootScope) {
     return {
@@ -126,12 +126,14 @@ function Local($http,$window,$rootScope) {
 
     //Check the userRole and make sure it's correct.
     function isAuthorized(authorizedRoles) {
-
         if (!angular.isArray(authorizedRoles)) {
             authorizedRoles = [authorizedRoles];
         }
 
-        return (authorizedRoles.indexOf($rootScope[config.user].role) !== -1);
+        //Dog And Pony fix, MATT
+        var role = $rootScope[config.user].role || $rootScope[config.user].status;
+
+        return (authorizedRoles.indexOf(role) !== -1);
     }
 
     function isAuthenticated() {
@@ -230,8 +232,8 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
         return false;
     }
 
-    function checkAuthorization(event, passed) {
-        var args = passed;
+    function checkAuthorization(event, arguments) {
+        var args = arguments;
         if($rootScope[config.user]) {
             //This is the default is nothing was set in the config data object for $stateProvider
             var authorizedRoles = {
@@ -243,6 +245,7 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
                 authorizedRoles = args.data.authorizedRoles;
             }
 
+            debugger;
             //Do a check to make sure that's it's not ALL and that they are authorized.
             if (!checkForAll(authorizedRoles) && !$rsAuth.isAuthorized(authorizedRoles) && !!$rsAuth.isAuthenticated()) {
                 //prevent the default event, which is go to state.
