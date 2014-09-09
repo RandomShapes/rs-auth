@@ -30,7 +30,7 @@ function $rsAuth() {
             },
 
             isAuthorized: function(authorizedRoles) {
-                return Local.isAuthenticated(authorizedRoles);
+                return Local.isAuthorized(authorizedRoles);
             },
 
             isRemembered: function() {

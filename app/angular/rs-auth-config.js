@@ -20,5 +20,5 @@ function AUTH_EVENTS() {
         sessionTimeout: '$authSessionTimeout',
         notAuthenticated: '$authNotAuthenticated',
         notAuthorized: '$authNotAuthorized'
-    } 
+    }; 
 }
