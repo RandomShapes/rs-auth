@@ -11,11 +11,14 @@ var userRoles = {
     all: '*'
 };
 
-var AUTH_EVENTS = {
-    loginSuccess: '$authLoginSuccess',
-    loginFailed: '$authLoginFailed',
-    logoutSuccess: '$authLogoutSuccess',
-    sessionTimeout: '$authSessionTimeout',
-    notAuthenticated: '$authNotAuthenticated',
-    notAuthorized: '$authNotAuthorized'
-};
+//Needs to be hoisted, which is why it's a function.
+function AUTH_EVENTS() {
+    return {
+        loginSuccess: '$authLoginSuccess',
+        loginFailed: '$authLoginFailed',
+        logoutSuccess: '$authLogoutSuccess',
+        sessionTimeout: '$authSessionTimeout',
+        notAuthenticated: '$authNotAuthenticated',
+        notAuthorized: '$authNotAuthorized'
+    } 
+}
