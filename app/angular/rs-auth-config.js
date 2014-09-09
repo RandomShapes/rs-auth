@@ -11,14 +11,11 @@ var userRoles = {
     all: '*'
 };
 
-//Needs to be hoisted, which is why it's a function.
-function AUTH_EVENTS() {
-    return {
-        loginSuccess: '$authLoginSuccess',
-        loginFailed: '$authLoginFailed',
-        logoutSuccess: '$authLogoutSuccess',
-        sessionTimeout: '$authSessionTimeout',
-        notAuthenticated: '$authNotAuthenticated',
-        notAuthorized: '$authNotAuthorized'
-    } 
-}
+angular.module('rs-auth').constant('AUTH_EVENTS', {
+    loginSuccess: '$authLoginSuccess',
+    loginFailed: '$authLoginFailed',
+    logoutSuccess: '$authLogoutSuccess',
+    sessionTimeout: '$authSessionTimeout',
+    notAuthenticated: '$authNotAuthenticated',
+    notAuthorized: '$authNotAuthorized'
+});

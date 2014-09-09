@@ -3,8 +3,8 @@
 angular.module('rs-auth', [])
     .factory('Local', Local)
     .provider('$rsAuth', $rsAuth)
-    .run(rsAuthRun)
-    .constant('AUTH_EVENTS', AUTH_EVENTS);
+    .run(rsAuthRun);
+    //constant set in config.
 var config = {
     authUrl: '',
     loginEndPoint: '/auth',
@@ -18,17 +18,14 @@ var userRoles = {
     all: '*'
 };
 
-//Needs to be hoisted, which is why it's a function.
-function AUTH_EVENTS() {
-    return {
-        loginSuccess: '$authLoginSuccess',
-        loginFailed: '$authLoginFailed',
-        logoutSuccess: '$authLogoutSuccess',
-        sessionTimeout: '$authSessionTimeout',
-        notAuthenticated: '$authNotAuthenticated',
-        notAuthorized: '$authNotAuthorized'
-    } 
-}
+angular.module('rs-auth').constant('AUTH_EVENTS', {
+    loginSuccess: '$authLoginSuccess',
+    loginFailed: '$authLoginFailed',
+    logoutSuccess: '$authLogoutSuccess',
+    sessionTimeout: '$authSessionTimeout',
+    notAuthenticated: '$authNotAuthenticated',
+    notAuthorized: '$authNotAuthorized'
+});
 function Local($http,$window,$rootScope) {
     return {
         login: login,
@@ -232,8 +229,8 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
         return false;
     }
 
-    function checkAuthorization(event, arguments) {
-        var args = arguments;
+    function checkAuthorization(event, argus) {
+        var args = argus;
         if($rootScope[config.user]) {
             //This is the default is nothing was set in the config data object for $stateProvider
             var authorizedRoles = {
@@ -245,7 +242,6 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
                 authorizedRoles = args.data.authorizedRoles;
             }
 
-            debugger;
             //Do a check to make sure that's it's not ALL and that they are authorized.
             if (!checkForAll(authorizedRoles) && !$rsAuth.isAuthorized(authorizedRoles) && !!$rsAuth.isAuthenticated()) {
                 //prevent the default event, which is go to state.
