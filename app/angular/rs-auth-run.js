@@ -41,33 +41,27 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
 
     function checkAuthorization(event, argus) {
         var args = argus;
-        if($rootScope[config.user]) {
-            //This is the default is nothing was set in the config data object for $stateProvider
-            var authorizedRoles = {
-                all: "*"
-            };
 
-            //Get the authorized roles from the $stateProvider
-            if(args.data && args.data.authorizedRoles) {
-                authorizedRoles = args.data.authorizedRoles;
-            }
+        //This is the default is nothing was set in the config data object for $stateProvider
+        var authorizedRoles = {
+            all: "*"
+        };
 
-            //Do a check to make sure that's it's not ALL and that they are authorized.
-            if (!checkForAll(authorizedRoles) && !$rsAuth.isAuthorized(authorizedRoles) && !!$rsAuth.isAuthenticated()) {
-                //prevent the default event, which is go to state.
+        //Get the authorized roles from the $stateProvider
+        if(args.data && args.data.authorizedRoles) {
+            authorizedRoles = args.data.authorizedRoles;
+        }
+
+        if(!checkForAll(authorizedRoles)) {
+            if (!$rsAuth.isAuthenticated()) {
+                //If they are not logged in at all.
                 event.preventDefault();
-                //If you're logged in but you're not authenticated to see the content.
-                $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
-            } else if (!checkForAll(authorizedRoles) && !$rsAuth.isAuthorized(authorizedRoles) && !!$rsAuth.isAuthenticated()) {
-                //prevent the default event, which is go to state.
-                event.preventDefault();
-                //If they are not logged in at all, tell them they are stupid for trying.
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+            } else if (!!$rsAuth.isAuthenticated() && !$rsAuth.isAuthorized) {
+                //If you're logged in but you're not authenticated to see the content.
+                event.preventDefault();
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
             }
-        } else {
-            $rootScope.$on(AUTH_EVENTS.loginSuccess, function(event) {
-                checkAuthorization(event, args);
-            });
         }
     }
 }
