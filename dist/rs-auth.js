@@ -26,7 +26,7 @@ angular.module('rs-auth').constant('AUTH_EVENTS', {
     notAuthenticated: '$authNotAuthenticated',
     notAuthorized: '$authNotAuthorized'
 });
-function Local($http,$window,$rootScope) {
+function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
     return {
         login: login,
         logout: logout,
@@ -39,7 +39,8 @@ function Local($http,$window,$rootScope) {
     };
 
     function login(credentials) {
-        return $http({
+        var deferred = $q.defer();
+        $http({
             url: config.authUrl + config.loginEndPoint, 
             method: "POST",
             data: credentials
@@ -53,16 +54,21 @@ function Local($http,$window,$rootScope) {
             }
             $window.sessionStorage.setItem('authToken',res.data.token);
             $rootScope[config.user] = res.data.user;
-            return res;
+            $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+            deferred.resolve(res);
         }
 
         function loginFail(error) {
             console.error("rs-auth login failed",error);
+            $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+            deferred.reject(error);
         }
+        return deferred.promise;
     }
 
     function logout() {
-        return $http({
+        var deferred = $q.defer();
+        $http({
             url: config.authUrl + config.logoutEndPoint, 
             method: "GET",
             headers: {'X-Auth-Token': $window.sessionStorage.getItem('authToken')}
@@ -74,15 +80,20 @@ function Local($http,$window,$rootScope) {
             $window.localStorage.clear();
             $window.sessionStorage.clear();
             $rootScope[config.user] = null;
+            $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
+            deferred.resolve(res);
         }
 
         function logoutFail(error) {
             console.error("rs-auth logout failed",error);
+            deferred.reject(error);
         }
+        return deferred.promise;
     }
 
     function register(credentials) {
-        return $http({
+        var deferred = $q.defer();
+        $http({
             url: config.authUrl + config.registerEndPoint, 
             method: "POST",
             data: credentials
@@ -93,16 +104,20 @@ function Local($http,$window,$rootScope) {
         function registerSuccess(res) {
             $window.sessionStorage.setItem('authToken',res.data.token);
             $rootScope[config.user] = res.data.user;
-            return res;
+            $rootScope.$broadcast(AUTH_EVENTS.registerSuccess);
+            deferred.resolve(res);
         }
 
         function registerFail(error) {
             console.error("rs-auth register failed",error);
+            deferred.reject(error);
         }
+        return deferred.promise;
     }
 
     function validateToken(authToken) {
-        return $http({
+        var deferred = $q.defer();
+        $http({
             url: config.authUrl + config.validateEndPoint, 
             method: "GET",
             headers: {'X-Auth-Token': authToken}
@@ -113,12 +128,14 @@ function Local($http,$window,$rootScope) {
         function validateTokenSuccess(res) {
             $window.sessionStorage.setItem('authToken',authToken);
             $rootScope[config.user] = res.data;
-            return res;
+            deferred.resolve(res);
         }
 
         function validateTokenFail(error) {
             console.error("rs-auth register failed",error);
+            deferred.reject(error);
         }
+        return deferred.promise;
     }
 
     //Check the userRole and make sure it's correct.
@@ -137,8 +154,7 @@ function Local($http,$window,$rootScope) {
         return $window.sessionStorage.getItem('authToken');
     }
 }
-Local.$inject = ["$http", "$window", "$rootScope"];
-
+Local.$inject = ["$http", "$window", "$rootScope", "AUTH_EVENTS", "$q"];
 function $rsAuth() {
 
     this.config = config;
