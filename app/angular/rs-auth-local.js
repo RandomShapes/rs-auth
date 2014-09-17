@@ -6,7 +6,7 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
         validateToken: validateToken,
         isAuthenticated: isAuthenticated,
         isAuthorized: isAuthorized,
-        isRemembered: isAuthenticated,
+        isRemembered: isRemembered,
         getToken: isAuthenticated
     };
 
@@ -124,5 +124,9 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
 
     function isAuthenticated() {
         return $window.sessionStorage.getItem('authToken');
+    }
+
+    function isRemembered() {
+        return $window.localStorage.getItem('authToken');
     }
 }
