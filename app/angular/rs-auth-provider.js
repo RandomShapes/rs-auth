@@ -7,7 +7,7 @@ function $rsAuth() {
         angular.extend(userRoles,userRolesObj);
     };
     /* @ngInject */
-    this.$get = function rsAuthFactory(Local) {
+    this.$get = function rsAuthFactory(Local, $rootScope, AUTH_EVENTS) {
         return {
             login: function (credentials) {
                 return Local.login(credentials);
@@ -41,7 +41,19 @@ function $rsAuth() {
                 return Local.getToken();
             },
 
+            currentUser: currentUser,
+
             userRoles: userRoles
         };
+
+        function currentUser(callback) {
+            if ($rootScope[config.user]) {
+                callback();
+            } else {
+                $rootScope.$on(AUTH_EVENTS.loginSuccess, function() {
+                    callback();
+                });
+            }
+        }
     };
 }
