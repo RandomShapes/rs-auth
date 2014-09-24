@@ -221,8 +221,6 @@ function $rsAuth() {
 }
 
 function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
-
-    $rootScope[config.user] = {};
     
     checkRemember();
 
