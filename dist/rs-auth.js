@@ -209,10 +209,10 @@ function $rsAuth() {
 
         function currentUser(callback) {
             if ($rootScope[config.user]) {
-                callback($rootScope[conif.user]);
+                callback($rootScope[config.user]);
             } else {
                 $rootScope.$on(AUTH_EVENTS.loginSuccess, function() {
-                    callback($rootScope[conif.user]);
+                    callback($rootScope[config.user]);
                 });
             }
         }
