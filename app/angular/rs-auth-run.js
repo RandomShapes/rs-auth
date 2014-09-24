@@ -1,6 +1,9 @@
 function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
+
+    $rootScope[config.user] = {};
     
     checkRemember();
+
 
     //TODO: Native Angular support, not UI.Router
     $rootScope.$on('$stateChangeStart', function(event, args) {

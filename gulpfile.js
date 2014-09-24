@@ -44,7 +44,7 @@ gulp.task('serve', function() {
 });
 
 gulp.task('build', function() {
- 	runSequence('jshint',['concat','minify']);
+ 	runSequence('jshint','concat','minify');
 });
 
 gulp.task('default', [

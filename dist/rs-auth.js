@@ -209,10 +209,10 @@ function $rsAuth() {
 
         function currentUser(callback) {
             if ($rootScope[config.user]) {
-                callback();
+                callback($rootScope[conif.user]);
             } else {
                 $rootScope.$on(AUTH_EVENTS.loginSuccess, function() {
-                    callback();
+                    callback($rootScope[conif.user]);
                 });
             }
         }
@@ -221,8 +221,11 @@ function $rsAuth() {
 }
 
 function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
+
+    $rootScope[config.user] = {};
     
     checkRemember();
+
 
     //TODO: Native Angular support, not UI.Router
     $rootScope.$on('$stateChangeStart', function(event, args) {
