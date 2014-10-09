@@ -211,7 +211,7 @@ function $rsAuth() {
             
 
             destroyTokens: function() {
-                return Loca.destroyTokens();
+                return Local.destroyTokens();
             },
 
             currentUser: currentUser,
