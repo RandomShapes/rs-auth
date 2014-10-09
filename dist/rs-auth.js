@@ -132,7 +132,8 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
         }
 
         function validateTokenFail(error) {
-            console.error("rs-auth register failed",error);
+            console.error("rs-auth found the token to be invalid, deleting tokens",error);
+            destroyTokens();
             deferred.reject(error);
         }
         return deferred.promise;
@@ -156,6 +157,11 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
 
     function isRemembered() {
         return $window.localStorage.getItem('authToken');
+    }
+
+    function destroyTokens() {
+        $window.localStorage.clear();
+        $window.sessionStorage.clear();
     }
 }
 Local.$inject = ["$http", "$window", "$rootScope", "AUTH_EVENTS", "$q"];
@@ -200,6 +206,11 @@ function $rsAuth() {
 
             getToken: function() {
                 return Local.getToken();
+            },
+            
+
+            destroyTokens: function() {
+                return Loca.destroyTokens();
             },
 
             currentUser: currentUser,

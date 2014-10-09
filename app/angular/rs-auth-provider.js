@@ -40,6 +40,11 @@ function $rsAuth() {
             getToken: function() {
                 return Local.getToken();
             },
+            
+
+            destroyTokens: function() {
+                return Loca.destroyTokens();
+            },
 
             currentUser: currentUser,
 
