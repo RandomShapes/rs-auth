@@ -135,5 +135,6 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
     function destroyTokens() {
         $window.localStorage.clear();
         $window.sessionStorage.clear();
+        $rootScope[config.user] = null;
     }
 }
