@@ -7,7 +7,8 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
         isAuthenticated: isAuthenticated,
         isAuthorized: isAuthorized,
         isRemembered: isRemembered,
-        getToken: isAuthenticated
+        getToken: isAuthenticated,
+        destroyTokens: destroyTokens
     };
 
     function login(credentials) {
