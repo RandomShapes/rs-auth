@@ -58,7 +58,7 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
                 //If they are not logged in at all.
                 event.preventDefault();
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
-            } else if (!!$rsAuth.isAuthenticated() && !$rsAuth.isAuthorized) {
+            } else if (!!$rsAuth.isAuthenticated() && !$rsAuth.isAuthorized()) {
                 //If you're logged in but you're not authenticated to see the content.
                 event.preventDefault();
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
