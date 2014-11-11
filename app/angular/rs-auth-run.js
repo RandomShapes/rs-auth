@@ -1,4 +1,4 @@
-function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
+function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
     
     checkRemember();
 
@@ -40,9 +40,7 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
         return false;
     }
 
-    function checkAuthorization(event, argus) {
-        var args = argus;
-
+    function checkAuthorization(event, args) {
         //This is the default is nothing was set in the config data object for $stateProvider
         var authorizedRoles = {
             all: "*"
@@ -54,15 +52,31 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth) {
         }
 
         if(!checkForAll(authorizedRoles)) {
-            if (!$rsAuth.isAuthenticated()) {
-                //If they are not logged in at all.
+
+            if (!$rsAuth.isAuthenticated()) { //If they have no token
+                
                 event.preventDefault();
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
-            } else if (!!$rsAuth.isAuthenticated() && !$rsAuth.isAuthorized()) {
-                //If you're logged in but you're not authenticated to see the content.
+
+            } else if ($rsAuth.isAuthenticated && //Has token
+                       !$rootScope[config.user]) { //has token but hasn't validated it yet, just try it again.
+                
+                event.preventDefault();
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                $rootScope.$on(AUTH_EVENTS.loginSuccess, function() {
+                    $state.go(args.name);
+                });
+
+            } else if ($rsAuth.isAuthenticated && //Has Token
+                       !!$rootScope[config.user] &&  //Token has been validated
+                       !$rsAuth.isAuthorized(authorizedRoles)) { //Check to see if they are allowed
+                
                 event.preventDefault();
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
-            }
+
+            } else { //If they have the token, they are validated and they are authorized go through
+                $rootScope.$broadcast(AUTH_EVENTS.authSuccess);
+            } 
         }
     }
 }

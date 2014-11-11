@@ -101,6 +101,7 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
         function validateTokenSuccess(res) {
             $window.sessionStorage.setItem('authToken',authToken);
             $rootScope[config.user] = res.data;
+            $rootScope.$broadcast(AUTH_EVENTS.validateSuccess);
             deferred.resolve(res);
         }
 
