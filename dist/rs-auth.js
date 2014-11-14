@@ -241,8 +241,8 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
 
 
     //TODO: Native Angular support, not UI.Router
-    $rootScope.$on('$stateChangeStart', function(event, args) {
-        checkAuthorization(event, args);
+    $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
+        checkAuthorization(event, toState, fromState);
     });
 
 
@@ -277,15 +277,16 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
         return false;
     }
 
-    function checkAuthorization(event, args) {
+    function checkAuthorization(event, toState, fromState) {
+
         //This is the default is nothing was set in the config data object for $stateProvider
         var authorizedRoles = {
             all: "*"
         };
 
         //Get the authorized roles from the $stateProvider
-        if(args.data && args.data.authorizedRoles) {
-            authorizedRoles = args.data.authorizedRoles;
+        if(toState.data && toState.data.authorizedRoles) {
+            authorizedRoles = toState.data.authorizedRoles;
         }
 
         if(!checkForAll(authorizedRoles)) {
@@ -293,15 +294,15 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
             if (!$rsAuth.isAuthenticated()) { //If they have no token
                 
                 event.preventDefault();
-                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated, fromState);
 
             } else if ($rsAuth.isAuthenticated && //Has token
                        !$rootScope[config.user]) { //has token but hasn't validated it yet, just try it again.
                 
                 event.preventDefault();
-                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated, fromState);
                 $rootScope.$on(AUTH_EVENTS.loginSuccess, function() {
-                    $state.go(args.name);
+                    $state.go(toState.name);
                 });
 
             } else if ($rsAuth.isAuthenticated && //Has Token
@@ -309,7 +310,7 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
                        !$rsAuth.isAuthorized(authorizedRoles)) { //Check to see if they are allowed
                 
                 event.preventDefault();
-                $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthorized, fromState);
 
             } else { //If they have the token, they are validated and they are authorized go through
                 $rootScope.$broadcast(AUTH_EVENTS.authSuccess);
