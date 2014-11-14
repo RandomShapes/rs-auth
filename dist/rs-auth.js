@@ -242,7 +242,7 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
 
     //TODO: Native Angular support, not UI.Router
     $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
-        checkAuthorization(event, toState, fromState);
+        checkAuthorization(event, toState, toParams, fromState, fromParams);
     });
 
 
@@ -277,7 +277,7 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
         return false;
     }
 
-    function checkAuthorization(event, toState, fromState) {
+    function checkAuthorization(event, toState, toParams, fromState, fromParams) {
 
         //This is the default is nothing was set in the config data object for $stateProvider
         var authorizedRoles = {
@@ -294,15 +294,15 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
             if (!$rsAuth.isAuthenticated()) { //If they have no token
                 
                 event.preventDefault();
-                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated, fromState);
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated, fromState, fromParams);
 
             } else if ($rsAuth.isAuthenticated && //Has token
                        !$rootScope[config.user]) { //has token but hasn't validated it yet, just try it again.
                 
                 event.preventDefault();
-                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated, fromState);
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated, fromState, fromParams);
                 $rootScope.$on(AUTH_EVENTS.loginSuccess, function() {
-                    $state.go(toState.name);
+                    $state.go(toState.name, toParams);
                 });
 
             } else if ($rsAuth.isAuthenticated && //Has Token
@@ -318,7 +318,6 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
         }
     }
 }
-rsAuthRun.$inject = ["AUTH_EVENTS", "$rootScope", "$rsAuth", "$state"];
- 
+rsAuthRun.$inject = ["AUTH_EVENTS", "$rootScope", "$rsAuth", "$state"]; 
 
 })(angular);
