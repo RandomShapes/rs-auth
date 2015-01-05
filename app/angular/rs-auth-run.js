@@ -2,7 +2,6 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
     
     checkRemember();
 
-
     //TODO: Native Angular support, not UI.Router
     $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
         checkAuthorization(event, toState, toParams, fromState, fromParams);
@@ -19,21 +18,15 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
             authToken = $rsAuth.isAuthenticated();
             $rsAuth.validateToken(authToken).then(function() {
                 $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-            },
-            function() {
-                $rootScope.$broadcast(AUTH_EVENTS.loginFail);
             });
 
         } else if (!!$rsAuth.isRemembered()) { //If the session is remembered globally, validate the token make sure it's clean.
             authToken = $rsAuth.isRemembered();
             $rsAuth.validateToken(authToken).then(function() {
                 $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-            },
-            function() {
-                $rootScope.$broadcast(AUTH_EVENTS.loginFail);
             });
         } else {
-            $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
+            $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
         }
     }
 
@@ -77,8 +70,8 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
                 });
 
             } else if ($rsAuth.isAuthenticated && //Has Token
-                       !!$rootScope[config.user] &&  //Token has been validated
-                       !$rsAuth.isAuthorized(authorizedRoles)) { //Check to see if they are allowed
+               !!$rootScope[config.user] &&  //Token has been validated
+               !$rsAuth.isAuthorized(authorizedRoles)) { //Check to see if they are allowed
                 
                 event.preventDefault();
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthorized, fromState);
