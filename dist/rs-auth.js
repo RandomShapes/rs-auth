@@ -271,6 +271,8 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
             function() {
                 $rootScope.$broadcast(AUTH_EVENTS.loginFail);
             });
+        } else {
+            $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
         }
     }
 
