@@ -18,5 +18,7 @@ angular.module('rs-auth').constant('AUTH_EVENTS', {
     sessionTimeout: '$authSessionTimeout',
     notAuthenticated: '$authNotAuthenticated',
     notAuthorized: '$authNotAuthorized',
-    authSuccess: '$authAuthSuccess'
+    authSuccess: '$authAuthSuccess',
+    validateSuccess: '$authValidateSuccess',
+    validateFailed: '$authValidateFailed',
 });

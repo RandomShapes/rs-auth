@@ -25,7 +25,9 @@ angular.module('rs-auth').constant('AUTH_EVENTS', {
     sessionTimeout: '$authSessionTimeout',
     notAuthenticated: '$authNotAuthenticated',
     notAuthorized: '$authNotAuthorized',
-    authSuccess: '$authAuthSuccess'
+    authSuccess: '$authAuthSuccess',
+    validateSuccess: '$authValidateSuccess',
+    validateFailed: '$authValidateFailed',
 });
 function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
     return {
@@ -256,12 +258,18 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
             authToken = $rsAuth.isAuthenticated();
             $rsAuth.validateToken(authToken).then(function() {
                 $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+            },
+            function() {
+                $rootScope.$broadcast(AUTH_EVENTS.loginFail);
             });
 
         } else if (!!$rsAuth.isRemembered()) { //If the session is remembered globally, validate the token make sure it's clean.
             authToken = $rsAuth.isRemembered();
             $rsAuth.validateToken(authToken).then(function() {
                 $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+            },
+            function() {
+                $rootScope.$broadcast(AUTH_EVENTS.loginFail);
             });
         }
     }
