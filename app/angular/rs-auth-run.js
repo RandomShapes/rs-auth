@@ -1,4 +1,4 @@
-function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
+function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
     
     checkRemember();
 
@@ -26,7 +26,10 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state) {
                 $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
             });
         } else {
-            $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+            //There's a timeout because there no ajax call so there no time to register listens for this
+            $timeout(function() {            
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+            });
         }
     }
 
