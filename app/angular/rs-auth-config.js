@@ -21,4 +21,5 @@ angular.module('rs-auth').constant('AUTH_EVENTS', {
     authSuccess: '$authAuthSuccess',
     validateSuccess: '$authValidateSuccess',
     validateFailed: '$authValidateFailed',
+    noToken: '$authNoToken'
 });

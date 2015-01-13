@@ -28,7 +28,7 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
         } else {
             //There's a timeout because there no ajax call so there no time to register listens for this
             $timeout(function() {            
-                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                $rootScope.$broadcast(AUTH_EVENTS.noToken);
             });
         }
     }
