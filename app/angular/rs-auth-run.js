@@ -71,8 +71,13 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated, fromState, fromParams);
 
                 //Happened eventually
-                $rootScope.$on(AUTH_EVENTS.loginSuccess, function() {
+                $rootScope.$on(AUTH_EVENTS.validateSuccess, function() {
                     $state.go(toState.name, toParams);
+                });
+
+                //Happened eventually
+                $rootScope.$on(AUTH_EVENTS.validateFailure, function() {
+                    $rootScope.$broadcast(AUTH_EVENTS.authFailed);
                 });
 
                 //Happened eventually
