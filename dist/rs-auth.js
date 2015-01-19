@@ -317,7 +317,6 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
                        !$rootScope[config.user]) { //has token but hasn't validated it yet, just try it again.
                 
                 event.preventDefault();
-                debugger;
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated, fromState, fromParams);
                 $rootScope.$on(AUTH_EVENTS.loginSuccess, function() {
                     $state.go(toState.name, toParams);
