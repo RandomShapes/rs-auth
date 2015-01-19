@@ -70,13 +70,14 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
                 event.preventDefault();
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated, fromState, fromParams);
 
-                var loadingTimer = setTimeout(function() {
-                    $rootScope.$broadcast(AUTH_EVENTS.authFailed);
-                }, 1000);
-
+                //Happened eventually
                 $rootScope.$on(AUTH_EVENTS.loginSuccess, function() {
-                    clearTimeout(loadingTimer);
                     $state.go(toState.name, toParams);
+                });
+
+                //Happened eventually
+                $rootScope.$on(AUTH_EVENTS.validateFailure, function() {
+                    $rootScope.$broadcast(AUTH_EVENTS.authFailed);
                 });
 
             } else if ($rsAuth.isAuthenticated && //Has Token
