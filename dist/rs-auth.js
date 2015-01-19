@@ -22,13 +22,15 @@ angular.module('rs-auth').constant('AUTH_EVENTS', {
     loginSuccess: '$authLoginSuccess',
     loginFailed: '$authLoginFailed',
     logoutSuccess: '$authLogoutSuccess',
+    logoutFailed: '$authLogoutFailed',
     sessionTimeout: '$authSessionTimeout',
     notAuthenticated: '$authNotAuthenticated',
     notAuthorized: '$authNotAuthorized',
     authSuccess: '$authAuthSuccess',
+    authFailed: '$authAuthFailed',
     validateSuccess: '$authValidateSuccess',
     validateFailed: '$authValidateFailed',
-    noToken: '$authNoToken'
+    clearLoader: '$authClearLoader'
 });
 function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
     return {
@@ -91,6 +93,7 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
 
         function logoutFail(error) {
             console.error("rs-auth logout failed",error);
+            $rootScope.$broadcast(AUTH_EVENTS.logoutFailed);
             deferred.reject(error);
         }
         return deferred.promise;
@@ -109,7 +112,6 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
         function registerSuccess(res) {
             $window.sessionStorage.setItem('authToken',res.data.token);
             $rootScope[config.user] = res.data.user;
-            $rootScope.$broadcast(AUTH_EVENTS.registerSuccess);
             deferred.resolve(res);
         }
 
@@ -139,6 +141,7 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
 
         function validateTokenFail(error) {
             console.error("rs-auth found the token to be invalid, deleting tokens",error);
+            $rootScope.$broadcast(AUTH_EVENTS.validateFailure);
             destroyTokens();
             deferred.reject(error);
         }
@@ -154,15 +157,21 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
         //Dog And Pony fix, MATT
         var role = $rootScope[config.user].role || $rootScope[config.user].status;
 
-        return (authorizedRoles.indexOf(role) !== -1);
+        var authorized = (authorizedRoles.indexOf(role) !== -1);
+
+        return authorized;
     }
 
     function isAuthenticated() {
-        return $window.sessionStorage.getItem('authToken');
+        var authenticated = $window.sessionStorage.getItem('authToken');
+
+        return authenticated;
     }
 
     function isRemembered() {
-        return $window.localStorage.getItem('authToken');
+        var remembered = $window.localStorage.getItem('authToken');
+
+        return remembered;
     }
 
     function destroyTokens() {
@@ -257,18 +266,19 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
         if (!!$rsAuth.isAuthenticated()) {
             authToken = $rsAuth.isAuthenticated();
             $rsAuth.validateToken(authToken).then(function() {
-                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                $rootScope.$broadcast(AUTH_EVENTS.authSuccess);
             });
 
         } else if (!!$rsAuth.isRemembered()) { //If the session is remembered globally, validate the token make sure it's clean.
             authToken = $rsAuth.isRemembered();
             $rsAuth.validateToken(authToken).then(function() {
-                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                $rootScope.$broadcast(AUTH_EVENTS.authSuccess);
             });
         } else {
             //There's a timeout because there no ajax call so there no time to register listens for this
             $timeout(function() {            
-                $rootScope.$broadcast(AUTH_EVENTS.noToken);
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                $rootScope.$broadcast(AUTH_EVENTS.authFailed);
             });
         }
     }
@@ -307,6 +317,7 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
                        !$rootScope[config.user]) { //has token but hasn't validated it yet, just try it again.
                 
                 event.preventDefault();
+                debugger;
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated, fromState, fromParams);
                 $rootScope.$on(AUTH_EVENTS.loginSuccess, function() {
                     $state.go(toState.name, toParams);

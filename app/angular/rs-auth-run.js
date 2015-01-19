@@ -17,18 +17,19 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
         if (!!$rsAuth.isAuthenticated()) {
             authToken = $rsAuth.isAuthenticated();
             $rsAuth.validateToken(authToken).then(function() {
-                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                $rootScope.$broadcast(AUTH_EVENTS.authSuccess);
             });
 
         } else if (!!$rsAuth.isRemembered()) { //If the session is remembered globally, validate the token make sure it's clean.
             authToken = $rsAuth.isRemembered();
             $rsAuth.validateToken(authToken).then(function() {
-                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                $rootScope.$broadcast(AUTH_EVENTS.authSuccess);
             });
         } else {
             //There's a timeout because there no ajax call so there no time to register listens for this
             $timeout(function() {            
-                $rootScope.$broadcast(AUTH_EVENTS.noToken);
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                $rootScope.$broadcast(AUTH_EVENTS.authFailed);
             });
         }
     }
@@ -67,6 +68,7 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
                        !$rootScope[config.user]) { //has token but hasn't validated it yet, just try it again.
                 
                 event.preventDefault();
+                debugger;
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated, fromState, fromParams);
                 $rootScope.$on(AUTH_EVENTS.loginSuccess, function() {
                     $state.go(toState.name, toParams);

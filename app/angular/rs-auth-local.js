@@ -59,6 +59,7 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
 
         function logoutFail(error) {
             console.error("rs-auth logout failed",error);
+            $rootScope.$broadcast(AUTH_EVENTS.logoutFailed);
             deferred.reject(error);
         }
         return deferred.promise;
@@ -77,7 +78,6 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
         function registerSuccess(res) {
             $window.sessionStorage.setItem('authToken',res.data.token);
             $rootScope[config.user] = res.data.user;
-            $rootScope.$broadcast(AUTH_EVENTS.registerSuccess);
             deferred.resolve(res);
         }
 
@@ -107,6 +107,7 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
 
         function validateTokenFail(error) {
             console.error("rs-auth found the token to be invalid, deleting tokens",error);
+            $rootScope.$broadcast(AUTH_EVENTS.validateFailure);
             destroyTokens();
             deferred.reject(error);
         }
@@ -122,15 +123,21 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
         //Dog And Pony fix, MATT
         var role = $rootScope[config.user].role || $rootScope[config.user].status;
 
-        return (authorizedRoles.indexOf(role) !== -1);
+        var authorized = (authorizedRoles.indexOf(role) !== -1);
+
+        return authorized;
     }
 
     function isAuthenticated() {
-        return $window.sessionStorage.getItem('authToken');
+        var authenticated = $window.sessionStorage.getItem('authToken');
+
+        return authenticated;
     }
 
     function isRemembered() {
-        return $window.localStorage.getItem('authToken');
+        var remembered = $window.localStorage.getItem('authToken');
+
+        return remembered;
     }
 
     function destroyTokens() {
