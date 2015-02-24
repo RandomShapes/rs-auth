@@ -1,4 +1,4 @@
-function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
+function Local($http,$window,$rootScope,AUTH_EVENTS,$q,$timeout) {
     return {
         login: login,
         logout: logout,
@@ -141,8 +141,10 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
     }
 
     function destroyTokens() {
-        $window.localStorage.clear();
-        $window.sessionStorage.clear();
-        $rootScope[config.user] = null;
+        $timeout(function() {
+            $window.localStorage.clear();
+            $window.sessionStorage.clear();
+            $rootScope[config.user] = null;
+        });
     }
 }

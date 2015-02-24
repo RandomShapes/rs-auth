@@ -32,7 +32,7 @@ angular.module('rs-auth').constant('AUTH_EVENTS', {
     validateFailed: '$authValidateFailed',
     clearLoader: '$authClearLoader'
 });
-function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
+function Local($http,$window,$rootScope,AUTH_EVENTS,$q,$timeout) {
     return {
         login: login,
         logout: logout,
@@ -175,12 +175,14 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q) {
     }
 
     function destroyTokens() {
-        $window.localStorage.clear();
-        $window.sessionStorage.clear();
-        $rootScope[config.user] = null;
+        $timeout(function() {
+            $window.localStorage.clear();
+            $window.sessionStorage.clear();
+            $rootScope[config.user] = null;
+        });
     }
 }
-Local.$inject = ["$http", "$window", "$rootScope", "AUTH_EVENTS", "$q"];
+Local.$inject = ["$http", "$window", "$rootScope", "AUTH_EVENTS", "$q", "$timeout"];
 function $rsAuth() {
 
     this.config = config;
