@@ -331,11 +331,6 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
                     $rootScope.$broadcast(AUTH_EVENTS.authFailed);
                 });
 
-                //Happened eventually
-                $rootScope.$on(AUTH_EVENTS.validateFailure, function() {
-                    $rootScope.$broadcast(AUTH_EVENTS.authFailed);
-                });
-
             } else if ($rsAuth.isAuthenticated && //Has Token
                !!$rootScope[config.user] &&  //Token has been validated
                !$rsAuth.isAuthorized(authorizedRoles)) { //Check to see if they are allowed
