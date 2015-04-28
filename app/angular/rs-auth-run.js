@@ -16,9 +16,14 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
         var authToken;
         if (!!$rsAuth.isAuthenticated()) {
             authToken = $rsAuth.isAuthenticated();
-            $rsAuth.validateToken(authToken).then(function() {
-                $rootScope.$broadcast(AUTH_EVENTS.authSuccess);
-            });
+            $rsAuth.validateToken(authToken).then(
+                function() {
+                    $rootScope.$broadcast(AUTH_EVENTS.authSuccess);
+                },
+                function() {
+                    $rootScope.$broadcast(AUTH_EVENTS.authFailed);
+                }
+            );
 
         } else if (!!$rsAuth.isRemembered()) { //If the session is remembered globally, validate the token make sure it's clean.
             authToken = $rsAuth.isRemembered();
