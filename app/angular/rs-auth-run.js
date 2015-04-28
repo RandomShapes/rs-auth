@@ -27,9 +27,14 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
 
         } else if (!!$rsAuth.isRemembered()) { //If the session is remembered globally, validate the token make sure it's clean.
             authToken = $rsAuth.isRemembered();
-            $rsAuth.validateToken(authToken).then(function() {
-                $rootScope.$broadcast(AUTH_EVENTS.authSuccess);
-            });
+            $rsAuth.validateToken(authToken).then(
+                function() {
+                    $rootScope.$broadcast(AUTH_EVENTS.authSuccess);
+                },
+                function() {
+                    $rootScope.$broadcast(AUTH_EVENTS.authFailed);
+                }
+            );
         } else {
             //There's a timeout because there no ajax call so there no time to register listens for this
             $timeout(function() {            
