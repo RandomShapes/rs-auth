@@ -79,7 +79,7 @@ function rsAuthRun(AUTH_EVENTS,$rootScope,$rsAuth,$state,$timeout) {
                 
                 event.preventDefault();
 
-                $rsAuth.validateToken($rsAuth.isAuthenticated);
+                $rsAuth.validateToken($rsAuth.isAuthenticated());
 
                 //Happened eventually
                 $rootScope.$on(AUTH_EVENTS.validateSuccess, function() {
