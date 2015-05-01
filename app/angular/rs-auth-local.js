@@ -34,7 +34,7 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q,$timeout) {
         function loginFail(error) {
             console.error("rs-auth login failed",error);
             $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
-            deferred.reject(error);
+            deferred.reject(error.status + " - " + error.data.message);
         }
         return deferred.promise;
     }
@@ -60,7 +60,7 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q,$timeout) {
         function logoutFail(error) {
             console.error("rs-auth logout failed",error);
             $rootScope.$broadcast(AUTH_EVENTS.logoutFailed);
-            deferred.reject(error);
+            deferred.reject(error.status + " - " + error.data.message);
         }
         return deferred.promise;
     }
@@ -83,7 +83,7 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q,$timeout) {
 
         function registerFail(error) {
             console.error("rs-auth register failed",error);
-            deferred.reject(error);
+            deferred.reject(error.status + " - " + error.data.message);
         }
         return deferred.promise;
     }
@@ -109,7 +109,7 @@ function Local($http,$window,$rootScope,AUTH_EVENTS,$q,$timeout) {
             console.error("rs-auth found the token to be invalid, deleting tokens",error);
             $rootScope.$broadcast(AUTH_EVENTS.validateFailure);
             destroyTokens();
-            deferred.reject(error);
+            deferred.reject(error.status + " - " + error.data.message);
         }
         return deferred.promise;
     }
